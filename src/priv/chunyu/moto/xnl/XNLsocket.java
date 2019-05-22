@@ -17,7 +17,7 @@ public class XNLsocket {
 	byte[] XNL_DEVICE_CONN_REQUEST = { (byte) 0x00, (byte) 0x18, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x06, (byte) 0xFF, (byte) 0xFF, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C,
 			(byte) 0x00, (byte) 0x00, (byte) 0x0A, (byte) 0x01, (byte) 0x44, (byte) 0xF9, (byte) 0x27, (byte) 0x5D,
-			(byte) 0xE2, (byte) 0x44, (byte) 0x9A, (byte) 0x9A, };
+			(byte) 0xE2, (byte) 0x44, (byte) 0x9A, (byte) 0x9A };
 
 	public XNLsocket() throws IOException, InterruptedException {
 		master = new Socket("192.168.10.1", 8002);// Pc set as master ,and setup connection
