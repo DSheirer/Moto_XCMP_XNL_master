@@ -4,6 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
+import javax.xml.bind.DatatypeConverter;
+
 import priv.chunyu.moto.TEA.TEA;
 
 public class XNLsocket {
@@ -11,7 +14,6 @@ public class XNLsocket {
 	DataInputStream input;// data input
 	StringBuilder sb = new StringBuilder();
 	Socket master;// Pc
-
 	byte[] XNL_DEVICE_AUTH_KEY_REQUEST = { (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 	byte[] XNL_DEVICE_CONN_REQUEST = { (byte) 0x00, (byte) 0x18, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00,
@@ -48,8 +50,32 @@ public class XNLsocket {
 		byte[] data = new byte[24];
 		StringBuilder HexicmalData = ReadingData(data);
 		System.out.println(HexicmalData);// here sb is hexadecimal string
-		TEA key = new TEA(HexicmalData.toString());
+		byte temp_key[] = new byte[2];// storing temp key
+		temp_key = KeyData(HexicmalData, temp_key.length);
+		//System.out.print(temp_key[0] +" "+ hexValue(temp_key[1])+" "+ hexValue(temp_key[2])+" "+hexValue(temp_key[3]));
+		setXNL_DEVICE_CONN_REQUEST(temp_key);
 		sb.delete(0, sb.length());
+	}
+
+	private void setXNL_DEVICE_CONN_REQUEST(byte[] temp_key) {
+		for(int i=18;i<XNL_DEVICE_CONN_REQUEST.length;i++) {
+			XNL_DEVICE_CONN_REQUEST[i]=temp_key[i-18];
+		}
+		
+	}
+
+	private byte[] KeyData(StringBuilder HexicmalData, int length) {
+		String temp_key[] = new String[2];
+		// String x=HexicmalData.subSequence(0, 32).toString();
+		String key0 = HexicmalData.subSequence(32, 40).toString();
+		String key1 = HexicmalData.subSequence(40, 48).toString();
+		temp_key[0] = key0;
+		temp_key[1] = key1;
+		TEA key = new TEA(temp_key);
+		String Encrypt_key;////要更改
+		Encrypt_key = key.getValue();
+		System.out.println("Encrypted Key(from main):"+Encrypt_key);
+		return toByteArray(Encrypt_key);
 	}
 
 	private void send_XNL_REQUEST() throws IOException {
@@ -64,18 +90,17 @@ public class XNLsocket {
 		}
 		return sb;
 	}
-	/*
-	 * public static byte [] hexToByteArray(String inHex) { int hexlen =
-	 * inHex.length(); byte [] result; if (hexlen % 2 == 1) { // 奇数 hexlen++; result
-	 * = new byte[(hexlen / 2)]; inHex = "0" + inHex; } else { // 偶数 result = new
-	 * byte[(hexlen / 2)]; } int j = 0; for (int i = 0; i < hexlen; i += 2) {
-	 * result[j] = hexToByte(inHex.substring(i, i + 2)); j++; } return result; }
-	 * public static byte hexToByte(String inHex) { return (byte)
-	 * Integer.parseInt(inHex, 16); }
-	 */
+	public static byte[] toByteArray(String s) {
+	    return DatatypeConverter.parseHexBinary(s);
+	}
+	/* testing for hex Value*/
+	public String hexValue(byte x) {
+		String hexValue = String.format("%02X",x);
+		return hexValue;
+	}
 
 }
 
-// 001600050000000000060000000afffd3a8f45f504dc006f
+// 001600050000000000060000000afffd 3a 8f 45 f5 04 dc 00 6f
 // 001600050000000000060000000afffc3a8f45f504dc006f
 // 001600050000000000060000000afffd09df7e9a60513cbb
