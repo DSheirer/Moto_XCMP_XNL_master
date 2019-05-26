@@ -4,16 +4,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-
 import javax.xml.bind.DatatypeConverter;
 
+import priv.chunyu.moto.Connection.CONNECT;
 import priv.chunyu.moto.TEA.TEA;
+import priv.chunyu.moto.xcmp.XCMP;
 
-public class XNLsocket {
-	DataOutputStream output;// data output
-	DataInputStream input;// data input
+public class XNLsocket extends XNL {
+	DataOutputStream output;
+	DataInputStream input;
+	Socket master;
 	StringBuilder sb = new StringBuilder();
-	Socket master;// Pc
 	byte[] XNL_DEVICE_AUTH_KEY_REQUEST = { (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 	byte[] XNL_DEVICE_CONN_REQUEST = { (byte) 0x00, (byte) 0x18, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00,
@@ -22,15 +23,28 @@ public class XNLsocket {
 			(byte) 0xE2, (byte) 0x44, (byte) 0x9A, (byte) 0x9A };
 
 	public XNLsocket() throws IOException, InterruptedException {
-		master = new Socket("192.168.10.1", 8002);// Pc set as master ,and setup connection
-		input = new DataInputStream(master.getInputStream());
-		output = new DataOutputStream(master.getOutputStream());
+		input=super.input;
+		output=super.output;
+		master=super.master;
+		System.out.println("XNL Connection");
 		receive_XNL_MASTER_STATUS_BROADCAST();
 		Thread.sleep(700);// waiting for XNL_MASTER_STATUS_BROADCAST
 		send_XNL_REQUEST();
 		receive_XNL_DEVICE_AUTH_KEY();
 		send_DEVICE_CONN_REQUEST();
+		receive_DEVICE_CONN_REPLY();
+		XCMP Xcmp_Connection = new XCMP();
+		Xcmp_Connection.start();
 
+	}
+
+	private void receive_DEVICE_CONN_REPLY() throws IOException {
+		byte data[] = new byte[28];
+		StringBuilder HexicmalData = ReadingData(data);
+		System.out.println("Receive DEVICE_CONN_REPLY");
+		System.out.println(HexicmalData);
+		System.out.println("XNL connection is established");
+		sb.delete(0, sb.length());
 	}
 
 	private void send_DEVICE_CONN_REQUEST() throws IOException {
@@ -52,16 +66,17 @@ public class XNLsocket {
 		System.out.println(HexicmalData);// here sb is hexadecimal string
 		byte temp_key[] = new byte[2];// storing temp key
 		temp_key = KeyData(HexicmalData, temp_key.length);
-		//System.out.print(temp_key[0] +" "+ hexValue(temp_key[1])+" "+ hexValue(temp_key[2])+" "+hexValue(temp_key[3]));
+		// System.out.print(temp_key[0] +" "+ hexValue(temp_key[1])+" "+
+		// hexValue(temp_key[2])+" "+hexValue(temp_key[3]));
 		setXNL_DEVICE_CONN_REQUEST(temp_key);
 		sb.delete(0, sb.length());
 	}
 
 	private void setXNL_DEVICE_CONN_REQUEST(byte[] temp_key) {
-		for(int i=18;i<XNL_DEVICE_CONN_REQUEST.length;i++) {
-			XNL_DEVICE_CONN_REQUEST[i]=temp_key[i-18];
+		for (int i = 18; i < XNL_DEVICE_CONN_REQUEST.length; i++) {
+			XNL_DEVICE_CONN_REQUEST[i] = temp_key[i - 18];
 		}
-		
+
 	}
 
 	private byte[] KeyData(StringBuilder HexicmalData, int length) {
@@ -72,9 +87,9 @@ public class XNLsocket {
 		temp_key[0] = key0;
 		temp_key[1] = key1;
 		TEA key = new TEA(temp_key);
-		String Encrypt_key;////要更改
+		String Encrypt_key;//// 要更改
 		Encrypt_key = key.getValue();
-		System.out.println("Encrypted Key(from main):"+Encrypt_key);
+		// System.out.println("Encrypted Key(from main):"+Encrypt_key);
 		return toByteArray(Encrypt_key);
 	}
 
@@ -90,12 +105,14 @@ public class XNLsocket {
 		}
 		return sb;
 	}
+
 	public static byte[] toByteArray(String s) {
-	    return DatatypeConverter.parseHexBinary(s);
+		return DatatypeConverter.parseHexBinary(s);
 	}
-	/* testing for hex Value*/
+
+	/* testing for hex Value */
 	public String hexValue(byte x) {
-		String hexValue = String.format("%02X",x);
+		String hexValue = String.format("%02X", x);
 		return hexValue;
 	}
 
