@@ -6,26 +6,25 @@ import java.io.IOException;
 import java.net.Socket;
 import javax.xml.bind.DatatypeConverter;
 
-import priv.chunyu.moto.Connection.CONNECT;
+import priv.chunyu.moto.DataProcesss.DataProcesss;
 import priv.chunyu.moto.TEA.TEA;
 import priv.chunyu.moto.xcmp.XCMP;
 
-public class XNLsocket extends XNL {
-	DataOutputStream output;
-	DataInputStream input;
-	Socket master;
-	StringBuilder sb = new StringBuilder();
+public class XNLsocket {
+	public Socket master;
+	public DataOutputStream output;
+	public DataInputStream input;// data input
 	byte[] XNL_DEVICE_AUTH_KEY_REQUEST = { (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 	byte[] XNL_DEVICE_CONN_REQUEST = { (byte) 0x00, (byte) 0x18, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x06, (byte) 0xFF, (byte) 0xFF, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C,
 			(byte) 0x00, (byte) 0x00, (byte) 0x0A, (byte) 0x01, (byte) 0x44, (byte) 0xF9, (byte) 0x27, (byte) 0x5D,
 			(byte) 0xE2, (byte) 0x44, (byte) 0x9A, (byte) 0x9A };
-
-	public XNLsocket() throws IOException, InterruptedException {
-		input=super.input;
-		output=super.output;
-		master=super.master;
+	public void run() throws IOException, InterruptedException {
+		XNL.getConnection();
+		master=XNL.master;
+		output=XNL.output;
+		input=XNL.input;
 		System.out.println("XNL Connection");
 		receive_XNL_MASTER_STATUS_BROADCAST();
 		Thread.sleep(700);// waiting for XNL_MASTER_STATUS_BROADCAST
@@ -35,41 +34,41 @@ public class XNLsocket extends XNL {
 		receive_DEVICE_CONN_REPLY();
 		XCMP Xcmp_Connection = new XCMP();
 		Xcmp_Connection.start();
-
-	}
-
-	private void receive_DEVICE_CONN_REPLY() throws IOException {
-		byte data[] = new byte[28];
-		StringBuilder HexicmalData = ReadingData(data);
-		System.out.println("Receive DEVICE_CONN_REPLY");
-		System.out.println(HexicmalData);
-		System.out.println("XNL connection is established");
-		sb.delete(0, sb.length());
 	}
 
 	private void send_DEVICE_CONN_REQUEST() throws IOException {
 		output.write(XNL_DEVICE_CONN_REQUEST);
 	}
 
+	private void receive_DEVICE_CONN_REPLY() throws IOException {
+		byte data[] = new byte[28];
+		input.read(data, 0, data.length);
+		StringBuilder HexicmalData = DataProcesss.ReadingData(data);
+		System.out.println("Receive DEVICE_CONN_REPLY");
+		System.out.println(HexicmalData);
+		System.out.println("XNL connection is established");
+	}
+
 	private void receive_XNL_MASTER_STATUS_BROADCAST() throws IOException {
 		System.out.println("Receving XNL Master Status BROADCAST");
 		byte[] data = new byte[21];
-		StringBuilder HexicmalData = ReadingData(data);
+		input.read(data, 0, data.length);
+		StringBuilder HexicmalData = DataProcesss.ReadingData(data);
 		System.out.println(HexicmalData);
-		sb.delete(0, sb.length());
 	}
 
 	private void receive_XNL_DEVICE_AUTH_KEY() throws IOException {
 		System.out.println("Receving Device Auth Key");
 		byte[] data = new byte[24];
-		StringBuilder HexicmalData = ReadingData(data);
+		input.read(data, 0, data.length);
+		StringBuilder HexicmalData = DataProcesss.ReadingData(data);
 		System.out.println(HexicmalData);// here sb is hexadecimal string
 		byte temp_key[] = new byte[2];// storing temp key
 		temp_key = KeyData(HexicmalData, temp_key.length);
-		// System.out.print(temp_key[0] +" "+ hexValue(temp_key[1])+" "+
-		// hexValue(temp_key[2])+" "+hexValue(temp_key[3]));
+		// System.out.println("test"+DataProcesss.hexValue(temp_key[0]) + " " +
+		// DataProcesss.hexValue(temp_key[1]) + " "+ DataProcesss.hexValue(temp_key[2])
+		// + " " + DataProcesss.hexValue(temp_key[3]));
 		setXNL_DEVICE_CONN_REQUEST(temp_key);
-		sb.delete(0, sb.length());
 	}
 
 	private void setXNL_DEVICE_CONN_REQUEST(byte[] temp_key) {
@@ -98,26 +97,7 @@ public class XNLsocket extends XNL {
 		output.write(XNL_DEVICE_AUTH_KEY_REQUEST);// sending XNL_DEVICE_AUTH_KEY_REQUEST to radio
 	}
 
-	private StringBuilder ReadingData(byte[] data) throws IOException {
-		input.read(data, 0, data.length);
-		for (byte b : data) {
-			sb.append(String.format("%02X", b));
-		}
-		return sb;
-	}
-
 	public static byte[] toByteArray(String s) {
 		return DatatypeConverter.parseHexBinary(s);
 	}
-
-	/* testing for hex Value */
-	public String hexValue(byte x) {
-		String hexValue = String.format("%02X", x);
-		return hexValue;
-	}
-
 }
-
-// 001600050000000000060000000afffd 3a 8f 45 f5 04 dc 00 6f
-// 001600050000000000060000000afffc3a8f45f504dc006f
-// 001600050000000000060000000afffd09df7e9a60513cbb

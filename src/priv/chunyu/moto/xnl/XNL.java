@@ -7,25 +7,12 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class XNL extends Thread {
-	/* setup connection */
-	Socket master = new Socket("192.168.10.1", 8002);// Pc set as master ,and setup connection;// Pc
-	DataOutputStream output = new DataOutputStream(master.getOutputStream());
-	DataInputStream input = new DataInputStream(master.getInputStream());;// data input
-	public XNL() throws IOException, InterruptedException {
-
+	protected static Socket master;
+	protected static DataOutputStream output;
+	protected static DataInputStream input;
+	public static void getConnection() throws UnknownHostException, IOException {
+		master = new Socket("192.168.10.1", 8002);// Pc set as master ,and setup connection;// Pc
+		output = new DataOutputStream(master.getOutputStream());
+		input = new DataInputStream(master.getInputStream());// data input
 	}
-	public void run() {
-		try {
-			XNLsocket XNLsocket = new XNLsocket();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	public void getConnection() throws UnknownHostException, IOException {
-	
-		
-	}
-
 }
