@@ -6,8 +6,10 @@ import priv.chunyu.moto.xnl.XNL;
 import priv.chunyu.moto.xnl.XNLsocket;
 
 public class XCMP extends XNL {
+	
 	public XCMP() throws IOException, InterruptedException {
-
+		super();
+		// TODO Auto-generated constructor stub
 	}
 
 	public void run() {
