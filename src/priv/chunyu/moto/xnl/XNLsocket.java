@@ -5,8 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import javax.xml.bind.DatatypeConverter;
-
-import priv.chunyu.moto.DataProcesss.DataProcesss;
+import priv.chunyu.moto.DataProcesss.DataProcess;
 import priv.chunyu.moto.TEA.TEA;
 import priv.chunyu.moto.xcmp.XCMP;
 
@@ -25,7 +24,7 @@ public class XNLsocket {
 		master=XNL.master;
 		output=XNL.output;
 		input=XNL.input;
-		System.out.println("XNL Connection");
+		System.out.println("XNL Connection...start");
 		receive_XNL_MASTER_STATUS_BROADCAST();
 		Thread.sleep(700);// waiting for XNL_MASTER_STATUS_BROADCAST
 		send_XNL_REQUEST();
@@ -43,17 +42,19 @@ public class XNLsocket {
 	private void receive_DEVICE_CONN_REPLY() throws IOException {
 		byte data[] = new byte[28];
 		input.read(data, 0, data.length);
-		StringBuilder HexicmalData = DataProcesss.ReadingData(data);
+		StringBuilder HexicmalData = DataProcess.ReadingData(data);
 		System.out.println("Receive DEVICE_CONN_REPLY");
 		System.out.println(HexicmalData);
-		System.out.println("XNL connection is established");
+		DataProcess.set_SrcAddress(data);//storing src address
+		DataProcess.set_DstAddress(data);// stroing dest address
+		System.out.println("XNL Connection Established\n");
 	}
 
 	private void receive_XNL_MASTER_STATUS_BROADCAST() throws IOException {
 		System.out.println("Receving XNL Master Status BROADCAST");
 		byte[] data = new byte[21];
 		input.read(data, 0, data.length);
-		StringBuilder HexicmalData = DataProcesss.ReadingData(data);
+		StringBuilder HexicmalData = DataProcess.ReadingData(data);
 		System.out.println(HexicmalData);
 	}
 
@@ -61,7 +62,7 @@ public class XNLsocket {
 		System.out.println("Receving Device Auth Key");
 		byte[] data = new byte[24];
 		input.read(data, 0, data.length);
-		StringBuilder HexicmalData = DataProcesss.ReadingData(data);
+		StringBuilder HexicmalData = DataProcess.ReadingData(data);
 		System.out.println(HexicmalData);// here sb is hexadecimal string
 		byte temp_key[] = new byte[2];// storing temp key
 		temp_key = KeyData(HexicmalData, temp_key.length);
