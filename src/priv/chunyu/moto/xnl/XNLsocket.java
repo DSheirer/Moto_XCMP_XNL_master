@@ -13,17 +13,16 @@ public class XNLsocket {
 	public Socket master;
 	public DataOutputStream output;
 	public DataInputStream input;// data input
-	byte[] XNL_DEVICE_AUTH_KEY_REQUEST = { (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 	byte[] XNL_DEVICE_CONN_REQUEST = { (byte) 0x00, (byte) 0x18, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x06, (byte) 0xFF, (byte) 0xFF, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C,
 			(byte) 0x00, (byte) 0x00, (byte) 0x0A, (byte) 0x01, (byte) 0x44, (byte) 0xF9, (byte) 0x27, (byte) 0x5D,
 			(byte) 0xE2, (byte) 0x44, (byte) 0x9A, (byte) 0x9A };
+	
 	public void run() throws IOException, InterruptedException {
-		XNL.getConnection();
-		master=XNL.master;
-		output=XNL.output;
-		input=XNL.input;
+		XNL.setConnection();
+		master = XNL.master;
+		output = XNL.output;
+		input = XNL.input;
 		System.out.println("XNL Connection...start");
 		receive_XNL_MASTER_STATUS_BROADCAST();
 		Thread.sleep(700);// waiting for XNL_MASTER_STATUS_BROADCAST
@@ -31,11 +30,27 @@ public class XNLsocket {
 		receive_XNL_DEVICE_AUTH_KEY();
 		send_DEVICE_CONN_REQUEST();
 		receive_DEVICE_CONN_REPLY();
+		receive_DEVICE_SYSMAP_BROADCAST();
 		XCMP Xcmp_Connection = new XCMP();
 		Xcmp_Connection.start();
 	}
 
+	
+
+	private void receive_DEVICE_SYSMAP_BROADCAST() throws IOException {
+		byte data[] = new byte[31];
+		input.read(data, 0, data.length);
+		StringBuilder HexicmalData = DataProcess.ReadingData(data);
+		System.out.println("Receive DEVICE_SYSMAP_BROADCAST");
+		System.out.println(HexicmalData);
+		System.out.println(" ");
+		//System.out.println(" ");
+		DataProcess.MessageStructure(data);
+
+	}
+
 	private void send_DEVICE_CONN_REQUEST() throws IOException {
+		
 		output.write(XNL_DEVICE_CONN_REQUEST);
 	}
 
@@ -45,8 +60,8 @@ public class XNLsocket {
 		StringBuilder HexicmalData = DataProcess.ReadingData(data);
 		System.out.println("Receive DEVICE_CONN_REPLY");
 		System.out.println(HexicmalData);
-		DataProcess.set_SrcAddress(data);//storing src address
-		DataProcess.set_DstAddress(data);// stroing dest address
+		DataProcess.set_RADIOAddress(data);// storing src address
+		DataProcess.set_XNL_MASTER_Address(data);// stroing dest address
 		System.out.println("XNL Connection Established\n");
 	}
 
@@ -66,9 +81,6 @@ public class XNLsocket {
 		System.out.println(HexicmalData);// here sb is hexadecimal string
 		byte temp_key[] = new byte[2];// storing temp key
 		temp_key = KeyData(HexicmalData, temp_key.length);
-		// System.out.println("test"+DataProcesss.hexValue(temp_key[0]) + " " +
-		// DataProcesss.hexValue(temp_key[1]) + " "+ DataProcesss.hexValue(temp_key[2])
-		// + " " + DataProcesss.hexValue(temp_key[3]));
 		setXNL_DEVICE_CONN_REQUEST(temp_key);
 	}
 
@@ -94,6 +106,9 @@ public class XNLsocket {
 	}
 
 	private void send_XNL_REQUEST() throws IOException {
+		byte[] XNL_DEVICE_AUTH_KEY_REQUEST = { (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x04, (byte) 0x00,
+				(byte) 0x00, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+				(byte) 0x00 };
 		System.out.println("sedning XNL Request");
 		output.write(XNL_DEVICE_AUTH_KEY_REQUEST);// sending XNL_DEVICE_AUTH_KEY_REQUEST to radio
 	}
