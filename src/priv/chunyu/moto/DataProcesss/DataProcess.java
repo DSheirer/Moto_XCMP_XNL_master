@@ -4,8 +4,8 @@ import java.io.IOException;
 
 public class DataProcess {
 	static StringBuilder sb = new StringBuilder();
-	static byte[] srcAddress = new byte[2]; // Master address
-	static byte[] dstAddress = new byte[2]; // raido address
+	static byte[] RadioAddress = new byte[2]; // radio
+	static byte[] MasterAddress = new byte[2]; // Master address
 
 	public static StringBuilder ReadingData(byte[] data) throws IOException {
 		sb.delete(0, sb.length());
@@ -21,24 +21,24 @@ public class DataProcess {
 		return hexValue;
 	}
 
-	public static void set_SrcAddress(byte[] data) {
-		dstAddress[0] = data[8];
-		dstAddress[1] = data[9];
-		// System.out.println("地址"+hexValue(dstAddress[0])+" "+hexValue(dstAddress[1]));
+	public static void set_RADIOAddress(byte[] data) {
+		RadioAddress[0] = data[8];
+		RadioAddress[1] = data[9];
+		 System.out.println("src地址"+hexValue(RadioAddress[0])+" "+hexValue(RadioAddress[1]));
 	}
 
-	public static void set_DstAddress(byte[] data) {
-		srcAddress[0] = data[10];
-		srcAddress[1] = data[11];
-		// System.out.println("地址"+hexValue(srcAddress[0])+" "+hexValue(srcAddress[1]));
+	public static void set_XNL_MASTER_Address(byte[] data) {
+		MasterAddress[0] = data[16];
+		MasterAddress[1] = data[17];
+		 System.out.println("DST地址"+hexValue(MasterAddress[0])+" "+hexValue(MasterAddress[1]));
 	}
 
-	public static byte[] get_DstAddress() {
-		return dstAddress;
+	public static byte[] get_MasterAddress() {
+		return MasterAddress;
 	}
 
-	public static byte[] get_SrcAddress() {
-		return srcAddress;
+	public static byte[] get_RadioAddress() {
+		return RadioAddress;
 	}
 
 	public static void MessageStructure(byte[] data) {
