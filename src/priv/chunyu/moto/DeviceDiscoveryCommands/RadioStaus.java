@@ -26,11 +26,8 @@ public class RadioStaus extends XNL {
 				(byte) 0X02, (byte) 0X03, // Transaction ID
 				(byte) 0X00, (byte) 0X00// payloadLeng
 		};
-		byte test[]= {
-				(byte) 0x00
-		};
 		output.write(ack);
-		output.write(test);
+		//output.write(test);
 		System.out.println("Sending back ACK");
 	}
 
