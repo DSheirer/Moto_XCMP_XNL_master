@@ -9,7 +9,6 @@ public class XCMP extends XNL {
 	
 	public XCMP() throws IOException, InterruptedException {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public void run() {
