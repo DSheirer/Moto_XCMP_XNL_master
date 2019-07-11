@@ -17,7 +17,7 @@ public class XNLsocket {
 			(byte) 0x00, (byte) 0x06, (byte) 0xFF, (byte) 0xFF, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x0C,
 			(byte) 0x00, (byte) 0x00, (byte) 0x0A, (byte) 0x01, (byte) 0x44, (byte) 0xF9, (byte) 0x27, (byte) 0x5D,
 			(byte) 0xE2, (byte) 0x44, (byte) 0x9A, (byte) 0x9A };
-	
+
 	public void run() throws IOException, InterruptedException {
 		XNL.setConnection();
 		master = XNL.master;
@@ -35,8 +35,6 @@ public class XNLsocket {
 		Xcmp_Connection.start();
 	}
 
-	
-
 	private void receive_DEVICE_SYSMAP_BROADCAST() throws IOException {
 		byte data[] = new byte[31];
 		input.read(data, 0, data.length);
@@ -44,13 +42,12 @@ public class XNLsocket {
 		System.out.println("Receive DEVICE_SYSMAP_BROADCAST");
 		System.out.println(HexicmalData);
 		System.out.println(" ");
-		//System.out.println(" ");
+		System.out.println("Logical identifier " + data[17] + " " + data[18]);
 		DataProcess.MessageStructure(data);
 
 	}
 
 	private void send_DEVICE_CONN_REQUEST() throws IOException {
-		
 		output.write(XNL_DEVICE_CONN_REQUEST);
 	}
 
