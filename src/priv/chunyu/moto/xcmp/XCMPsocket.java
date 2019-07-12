@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import priv.chunyu.moto.DataProcesss.DataProcess;
-import priv.chunyu.moto.DeviceDiscoveryCommands.RadioStaus;
 import priv.chunyu.moto.xnl.XNL;
 
 public class XCMPsocket extends XCMP {
@@ -14,7 +13,6 @@ public class XCMPsocket extends XCMP {
 	protected static DataInputStream input;
 	protected static byte[] MasterAddress;
 	protected static byte[] RadioAddress;
-	// byte TranscationID[]=new byte [2];
 
 	public XCMPsocket() throws IOException, InterruptedException {
 		System.out.println("XCMP Connection... start");
@@ -24,9 +22,22 @@ public class XCMPsocket extends XCMP {
 		MasterAddress = DataProcess.get_MasterAddress(); // Pc address
 		RadioAddress = DataProcess.get_RadioAddress(); // raido address
 		receive_XCMP_DEVICE_INIT_STATUS();// g
+		//sleep(1000);
 		send_XCMP_DEVICE_INIT_STATUS();// h
 		receive_XCMP_DEVICE_INIT_STATUS_COMPLETE(); // i) ack
 		receive_RRCTRLBRDCST();
+		//send_MASTER_STATUS_BRDCST();
+	}
+
+	private void send_MASTER_STATUS_BRDCST() throws IOException {
+		byte data[] = { (byte) 0x00, (byte) 0x13, (byte) 0X00, (byte) 0x02, 
+				(byte) 0X00,(byte) 0x00, // Protocol ID  // FLag
+				(byte) 0x00, (byte) 0x00, (byte) MasterAddress[0], (byte) MasterAddress[1]// id?
+				, (byte) 0x00, (byte) 0x00, // Transaction ID
+				(byte) 0x00, (byte) 0x07, (byte) 0X00, (byte) 0x01, (byte) 0X00, (byte) 0x04,(byte) 0x01, (byte) 0x01,
+				(byte) 0X00 };
+		output.write(data);
+		System.out.println("Sending XNL Master Status BROADCAST");
 	}
 
 	private void send_DATA_RRCTRLBRDCST_ACK_COMPLETE(byte ID1, byte ID2) throws IOException {
@@ -39,9 +50,6 @@ public class XCMPsocket extends XCMP {
 		output.write(data);
 		System.out.println("ACK for Complete");
 		System.out.println("XCMP Establish Complete\n");
-		// System.out.println(DataProcess.hexValue(srcAddress[0]));
-		// System.out.println(DataProcess.hexValue(srcAddress[1]));
-
 	}
 
 	private void receive_RRCTRLBRDCST() throws IOException {
@@ -52,7 +60,7 @@ public class XCMPsocket extends XCMP {
 		System.out.println("Receive Remote Radio Control Broadcast");
 		System.out.println(HexicmalData);
 		DataProcess.MessageStructure(data);
-		send_DATA_RRCTRLBRDCST_ACK_COMPLETE(data[10],data[11]);
+		send_DATA_RRCTRLBRDCST_ACK_COMPLETE(data[10], data[11]);
 	}
 
 	private void send_DATA_MSG_ACK_COMPLETE(byte ID1, byte ID2) throws IOException {
@@ -80,7 +88,7 @@ public class XCMPsocket extends XCMP {
 		System.out.println("Receive XCMP_DEVICE_INIT_STATUS_COMPLETE");
 		System.out.println(HexicmalData);
 		DataProcess.MessageStructure(data);
-		send_DATA_MSG_ACK_COMPLETE(data[10],data[11]);
+		send_DATA_MSG_ACK_COMPLETE(data[10], data[11]);
 	}
 
 	private void send_XCMP_DEVICE_INIT_STATUS() throws IOException {
@@ -108,7 +116,7 @@ public class XCMPsocket extends XCMP {
 		StringBuilder HexicmalData = DataProcess.ReadingData(data);
 		System.out.println("Receive XCMP_DEVICE_INIT_STATUS");
 		System.out.println(HexicmalData);
-		send_DATA_MSG_ACK(data[10],data[11]);// gsend
+		send_DATA_MSG_ACK(data[10], data[11]);// gsend
 	}
 
 }
