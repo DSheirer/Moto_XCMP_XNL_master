@@ -2,9 +2,8 @@ package priv.chunyu.moto.DeviceDiscoveryCommands;
 
 import java.io.IOException;
 import java.util.logging.Logger;
-
 import priv.chunyu.moto.DataProcesss.DataProcess;
-import priv.chunyu.moto.xcmp.XCMPsocket;
+import priv.chunyu.moto.XCMP.XCMPsocket;
 
 /*
  * 1.Flag 要一樣 (data[5])  2.id要一樣(data[10]) 3.確保回正確的ack
@@ -28,7 +27,7 @@ public class ESN extends XCMPsocket {
 					(byte) id[0], (byte) id[1], (byte) 0X00, (byte) 0x03, (byte) 0X00, (byte) 0X0E, (byte) 0X09 };
 			output.write(data);
 			logger.info("Sending ESN Request");
-			lock.wait(500);;
+			lock.wait(500);
 		}
 		return esn;
 	}
@@ -36,9 +35,8 @@ public class ESN extends XCMPsocket {
 	public static void reply(byte[] data) throws IOException, InterruptedException {
 		synchronized (lock) {
 			esn = DataProcess.ReadingData(14, data.length, data);
-			System.out.println("	" + HexicmalData);
 			logger.info("Electric Serial Number: " + esn);
-			lock.notify();;
+			lock.notify();
 		}
 	}
 }
