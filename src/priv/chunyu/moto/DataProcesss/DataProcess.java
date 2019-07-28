@@ -15,6 +15,15 @@ public class DataProcess {
 		return sb;
 	}
 
+	public static String hexToAscii(int start, int end, String hexStr) {
+		StringBuilder output = new StringBuilder("");
+		for (int i = start; i < end; i += 2) {
+			String str = hexStr.substring(i, i + 2);
+			output.append((char) Integer.parseInt(str, 16));
+		}
+		return output.toString();
+	}
+
 	/* testing for hex Value */
 	public static String hexValue(byte x) {
 		String hexValue = String.format("%02X", x);
@@ -24,13 +33,13 @@ public class DataProcess {
 	public static void set_RADIOAddress(byte[] data) {
 		RadioAddress[0] = data[8];
 		RadioAddress[1] = data[9];
-		 System.out.println("src地址"+hexValue(RadioAddress[0])+" "+hexValue(RadioAddress[1]));
+		System.out.println("src地址" + hexValue(RadioAddress[0]) + " " + hexValue(RadioAddress[1]));
 	}
 
 	public static void set_XNL_MASTER_Address(byte[] data) {
 		MasterAddress[0] = data[16];
 		MasterAddress[1] = data[17];
-		 System.out.println("DST地址"+hexValue(MasterAddress[0])+" "+hexValue(MasterAddress[1]));
+		System.out.println("DST地址" + hexValue(MasterAddress[0]) + " " + hexValue(MasterAddress[1]));
 	}
 
 	public static byte[] get_MasterAddress() {
@@ -52,9 +61,25 @@ public class DataProcess {
 		System.out.print(" Payload Length " + hexValue(data[12]) + hexValue(data[13]));
 		System.out.print(" Payload "); // 14 to rest of the byte will be its Data
 		for (int i = 14; i < data.length; i++) {
-			System.out.print(hexValue(data[i])+" ");
+			System.out.print(hexValue(data[i]) + " ");
 		}
 		System.out.println(" ");
 
 	}
+	// Hex to Decimal
+	public static String ReadingData(int start, int end, byte[] data) {
+		StringBuilder value = new StringBuilder();
+		for (int i = start; i < end; i++) {
+			int x = data[i] & 0xff;
+			// System.out.println(temp);
+			value.append(x);
+		}
+		return value.toString();
+	}
+
+	public static int ReadingIntData(int value, byte[] data) {
+		int IntData= data[value] & 0xff;
+		return IntData;
+	}
+
 }
