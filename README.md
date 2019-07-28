@@ -1,4 +1,4 @@
-# Moto_XCMP/XNL/LRRP/ARP work as master in Java
+# Motorola_XCMP/XNL/LRRP/ARP work as master in Java
 Motorola XCMP-XNL develop
 Request XCMP Command (port 8002)
   1.	Model Number Command
